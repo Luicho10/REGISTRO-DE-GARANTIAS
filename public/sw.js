@@ -1,17 +1,34 @@
-const CACHE_NAME = 'registro-garantias-v1';
+const CACHE_NAME = 'registro-garantias-v2';
 const APP_SHELL = '/REGISTRO-DE-GARANTIAS/';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll([APP_SHELL, '/REGISTRO-DE-GARANTIAS/manifest.webmanifest', '/REGISTRO-DE-GARANTIAS/icon.svg'])));
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache =>
+      cache.addAll([
+        APP_SHELL,
+        '/REGISTRO-DE-GARANTIAS/manifest.webmanifest',
+        '/REGISTRO-DE-GARANTIAS/icon.svg'
+      ])
+    )
+  );
 });
 
 self.addEventListener('activate', event => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
+        keys
+          .filter(key => key.startsWith('registro-garantias-') && key !== CACHE_NAME)
+          .map(key => caches.delete(key))
+      )
+    ).then(() => self.clients.claim())
+  );
 });
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
+
   event.respondWith(
     fetch(event.request)
       .then(response => {
