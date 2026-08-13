@@ -3,7 +3,6 @@ const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_mob6Bya5CJ5AyzBNJd_TvA_VFIGyWc8
 
 const headersBase = {
   apikey: SUPABASE_PUBLISHABLE_KEY,
-  Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
   'Content-Type': 'application/json'
 };
 
