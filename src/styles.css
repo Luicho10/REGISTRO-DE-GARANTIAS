@@ -45,7 +45,7 @@ table { width:100%; border-collapse:collapse; font-size:11px; }
 th,td { border:1px solid #d5e4d8; padding:8px; text-align:left; }
 th { background:#e5f2e8; color:#245c3d; }
 .firmas-section { margin-top:18px; background:#fff; border:1px solid #cfe0d4; border-radius:6px; padding:18px 16px 22px; }
-.firmas-title { text-align:center; color:#176b45; font-size:13px; font-weight:800; margin-bottom:24px; letter-spacing:.2px; }
+.firmas-title { display:none; }
 .firmas-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:42px 60px; }
 .firma-box { text-align:center; min-width:0; }
 .firma-line { border-top:1px solid #4b5563; width:88%; margin:0 auto 8px; }
