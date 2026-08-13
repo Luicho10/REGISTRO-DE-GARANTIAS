@@ -7,28 +7,33 @@ const headersBase = {
   'Content-Type': 'application/json'
 };
 
+async function leerRespuesta(response) {
+  const texto = await response.text();
+  let datos = null;
+  try { datos = texto ? JSON.parse(texto) : null; } catch { datos = texto; }
+  if (!response.ok) {
+    const detalle = typeof datos === 'object' && datos?.message ? datos.message : 'No fue posible completar la operación.';
+    throw new Error(detalle);
+  }
+  return datos;
+}
+
 export async function guardarExpediente(expediente) {
   const response = await fetch(`${SUPABASE_URL}/rest/v1/expedientes_garantias?on_conflict=ci_ruc`, {
     method: 'POST',
-    headers: {
-      ...headersBase,
-      Prefer: 'resolution=merge-duplicates,return=representation'
-    },
+    headers: { ...headersBase, Prefer: 'resolution=merge-duplicates,return=representation' },
     body: JSON.stringify(expediente)
   });
-
-  const texto = await response.text();
-  let datos = null;
-  try {
-    datos = texto ? JSON.parse(texto) : null;
-  } catch {
-    datos = texto;
-  }
-
-  if (!response.ok) {
-    const detalle = typeof datos === 'object' && datos?.message ? datos.message : 'No fue posible guardar el expediente.';
-    throw new Error(detalle);
-  }
-
+  const datos = await leerRespuesta(response);
   return Array.isArray(datos) ? datos[0] : datos;
+}
+
+export async function consultarExpediente(ciRuc) {
+  const valor = encodeURIComponent(ciRuc.trim());
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/expedientes_garantias?ci_ruc=eq.${valor}&select=*`, {
+    method: 'GET',
+    headers: headersBase
+  });
+  const datos = await leerRespuesta(response);
+  return Array.isArray(datos) ? datos[0] || null : datos;
 }
