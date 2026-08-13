@@ -3,10 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#176b45" />
+    <meta name="description" content="Registro ordenado de clientes, garantías y documentación." />
+    <link rel="manifest" href="/REGISTRO-DE-GARANTIAS/manifest.webmanifest" />
+    <link rel="icon" href="/REGISTRO-DE-GARANTIAS/icon.svg" type="image/svg+xml" />
     <title>Registro de Garantías</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/REGISTRO-DE-GARANTIAS/sw.js');
+        });
+      }
+    </script>
   </body>
 </html>
