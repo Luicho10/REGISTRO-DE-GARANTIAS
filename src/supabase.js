@@ -1,5 +1,5 @@
 const SUPABASE_URL = 'https://layqqdkatatutmexoqrl.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_mob6Bya5CJ5AyzBNJd_TvA_VFIGyWc8';
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 const headersBase = {
   apikey: SUPABASE_PUBLISHABLE_KEY,
