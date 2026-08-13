@@ -33,9 +33,22 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build application
+      - name: Configure Supabase public environment
         env:
-          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          SUPABASE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ]; then
+            echo "ERROR: VITE_SUPABASE_URL no está configurada en las variables del repositorio."
+            exit 1
+          fi
+          if [ -z "$SUPABASE_KEY" ]; then
+            echo "ERROR: VITE_SUPABASE_PUBLISHABLE_KEY no está configurada en las variables del repositorio."
+            exit 1
+          fi
+          printf 'VITE_SUPABASE_URL=%s\nVITE_SUPABASE_PUBLISHABLE_KEY=%s\n' "$SUPABASE_URL" "$SUPABASE_KEY" > .env.production
+
+      - name: Build application
         run: npm run build
 
       - name: Setup Pages
