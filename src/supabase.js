@@ -1,10 +1,17 @@
 const SUPABASE_URL = 'https://layqqdkatatutmexoqrl.supabase.co';
 
-// Clave publishable de Supabase para el cliente web.
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+// Clave PUBLICABLE de Supabase.
+// Se deja un respaldo explícito porque GitHub Pages estaba compilando
+// el valor de la variable VITE_SUPABASE_PUBLISHABLE_KEY como
+// "sb_publishable_...", provocando el error "Invalid API key".
+const CLAVE_PUBLICA_FIJA = 'sb_publishable_mob6Bya5CJ5AyzBNJd_TvA_VFIGyWc8';
+const CLAVE_PUBLICA_ENV = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+const SUPABASE_PUBLISHABLE_KEY =
+  CLAVE_PUBLICA_ENV && CLAVE_PUBLICA_ENV !== 'sb_publishable_...'
+    ? CLAVE_PUBLICA_ENV
+    : CLAVE_PUBLICA_FIJA;
 
-// Las nuevas claves sb_publishable_* deben viajar mediante el encabezado
-// apikey. No se envían como Bearer JWT.
+// Las claves sb_publishable_* se envían mediante el encabezado apikey.
 const headersBase = {
   apikey: SUPABASE_PUBLISHABLE_KEY,
   'Content-Type': 'application/json'
@@ -13,6 +20,7 @@ const headersBase = {
 async function leerRespuesta(response) {
   const texto = await response.text();
   let datos = null;
+
   try {
     datos = texto ? JSON.parse(texto) : null;
   } catch {
@@ -28,6 +36,7 @@ async function leerRespuesta(response) {
           : typeof datos === 'object' && datos?.error
             ? datos.error
             : `Error Supabase (${response.status}).`;
+
     throw new Error(detalle);
   }
 
