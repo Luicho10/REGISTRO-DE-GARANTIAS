@@ -1,1 +1,1 @@
-guardarExpediente, consultarExpediente } from './supabase.js';
+export { guardarExpediente, consultarExpediente } from './supabase.js';
