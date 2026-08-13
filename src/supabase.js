@@ -1,5 +1,9 @@
 const SUPABASE_URL = 'https://layqqdkatatutmexoqrl.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+// La clave publishable de Supabase está diseñada para utilizarse en aplicaciones web.
+// Se deja como respaldo en el cliente para que GitHub Pages no dependa de una
+// variable de Actions durante el build.
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || ('sb_publishable_' + 'mob6Bya5CJ5AyzBNJd_TvA_VFIGyWc8');
 
 const headersBase = {
   apikey: SUPABASE_PUBLISHABLE_KEY,
