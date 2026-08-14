@@ -1,7 +1,7 @@
 {
   "name": "registro-de-garantias",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@erikmichelson/open-location-code-ts": "1.20250411.0",
     "react": "latest",
     "react-dom": "latest"
   },
