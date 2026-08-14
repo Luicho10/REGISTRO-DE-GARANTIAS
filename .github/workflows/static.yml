@@ -33,23 +33,32 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Configure Supabase public environment
+      - name: Configure Supabase public URL
         env:
           SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          SUPABASE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
         run: |
           if [ -z "$SUPABASE_URL" ]; then
             echo "ERROR: VITE_SUPABASE_URL no está configurada en las variables del repositorio."
             exit 1
           fi
-          if [ -z "$SUPABASE_KEY" ]; then
-            echo "ERROR: VITE_SUPABASE_PUBLISHABLE_KEY no está configurada en las variables del repositorio."
-            exit 1
-          fi
-          printf 'VITE_SUPABASE_URL=%s\nVITE_SUPABASE_PUBLISHABLE_KEY=%s\n' "$SUPABASE_URL" "$SUPABASE_KEY" > .env.production
+          printf 'VITE_SUPABASE_URL=%s\n' "$SUPABASE_URL" > .env.production
+          echo "URL de Supabase configurada correctamente. La clave publishable se obtiene del cliente."
 
       - name: Build application
         run: npm run build
+
+      - name: Verify Supabase key in production bundle
+        run: |
+          if grep -Rqs 'sb_publishable_' dist/assets; then
+            echo "Clave publishable detectada en el bundle."
+          else
+            echo "ERROR: No se encontró una clave publishable en el bundle de producción."
+            exit 1
+          fi
+          if grep -Rqs 'apikey:\`sb_publishable_\`' dist/assets; then
+            echo "ERROR: El bundle contiene una clave truncada sb_publishable_."
+            exit 1
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
