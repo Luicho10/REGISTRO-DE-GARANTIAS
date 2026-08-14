@@ -19,7 +19,12 @@ textarea { resize:vertical; }
 .wide { grid-column:1/-1; }
 .gps-title,.actions-title { display:flex; align-items:center; justify-content:space-between; }
 .gps-grid { align-items:end; }
+.gps-search-row { grid-column:1/-1; display:flex; align-items:center; gap:10px; padding:0 2px; }
+.gps-search-row .btn:disabled { opacity:.65; cursor:wait; }
+.gps-map-link { color:#176b45; font-size:12px; font-weight:700; text-decoration:none; border:1px solid #b9d3bf; background:#edf7ef; border-radius:5px; padding:8px 11px; }
+.gps-map-link:hover { text-decoration:underline; }
 .gps-status { grid-column:1/-1; color:#667788; font-size:12px; padding:4px 2px; }
+.gps-attribution { padding:0 16px 12px; color:#8a96a3; font-size:10px; }
 .gps-map-wrapper { margin:2px 16px 16px; border:1px solid #cfe0d4; border-radius:6px; overflow:hidden; background:#fff; }
 .gps-map-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:10px 12px; background:#edf7ef; border-bottom:1px solid #cfe0d4; color:#176b45; }
 .gps-map-heading strong { display:block; font-size:11px; font-weight:800; }
@@ -62,5 +67,5 @@ th { background:#e5f2e8; color:#245c3d; }
 .firma-ci { color:#526273; font-size:11px; margin-top:3px; }
 .footer-actions { text-align:right; margin-top:14px; }
 footer { text-align:center; color:#8a96a3; font-size:10px; padding:12px; }
-@media(max-width:700px) { .topbar{padding:10px 14px}.brand{font-size:17px}.form-grid,.summary-header,.detail-grid,.firmas-grid{grid-template-columns:1fr}.wide,.detail-note,.gps-status{grid-column:auto}.gps-title,.actions-title{gap:8px;align-items:flex-start}.gps-map-wrapper{margin-left:14px;margin-right:14px}.gps-map{height:300px}.gps-map-heading{align-items:flex-start;flex-direction:column}.gps-map-badge{align-self:flex-start} }
+@media(max-width:700px) { .topbar{padding:10px 14px}.brand{font-size:17px}.form-grid,.summary-header,.detail-grid,.firmas-grid{grid-template-columns:1fr}.wide,.detail-note,.gps-status,.gps-search-row{grid-column:auto}.gps-title,.actions-title{gap:8px;align-items:flex-start}.gps-search-row{flex-direction:column;align-items:stretch}.gps-map-wrapper{margin-left:14px;margin-right:14px}.gps-map{height:300px}.gps-map-heading{align-items:flex-start;flex-direction:column}.gps-map-badge{align-self:flex-start} }
 @media print { body{background:#fff}.no-print{display:none!important}.container{width:100%;margin:0}.card{box-shadow:none;break-inside:avoid}.hero,.section-title,th,.garantia-header,.specific-title,.firmas-section,.gps-map-heading{print-color-adjust:exact;-webkit-print-color-adjust:exact}.gps-map-wrapper{display:none!important}input,select,textarea{background:#fff}.firmas-section{break-inside:avoid;border:0;margin-top:18px;padding-left:0;padding-right:0}.garantias-list .garantia-card:nth-child(3){page-break-before:always;} }
