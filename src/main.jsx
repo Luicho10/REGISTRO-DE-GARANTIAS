@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 import './styles.css';
 import { guardarExpediente, consultarExpediente } from './nube.js';
+import { decode, isValid, isShort, recoverNearest } from '@erikmichelson/open-location-code-ts';
 
 const LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
 const LEAFLET_JS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
@@ -38,6 +39,7 @@ function numeroValido(v) {
 }
 
 function ponerValor(input, valor) {
+  if (!input) return;
   const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
   if (setter) setter.call(input, valor);
   else input.value = valor;
@@ -46,6 +48,7 @@ function ponerValor(input, valor) {
 }
 
 function ponerControl(control, valor) {
+  if (!control) return;
   const proto = control.tagName === 'SELECT' ? HTMLSelectElement.prototype : control.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
   const setter = Object.getOwnPropertyDescriptor(proto, 'value')?.set;
   if (setter) setter.call(control, valor ?? '');
@@ -202,6 +205,74 @@ function crearBotonesPersistencia() {
   else topbar.appendChild(acciones);
 }
 
+async function buscarPorPlusCode() {
+  const panel = document.querySelector('.pluscode-panel');
+  if (!panel) return;
+  const codeInput = panel.querySelector('[data-plus-code]');
+  const refInput = panel.querySelector('[data-plus-ref]');
+  const status = panel.querySelector('[data-plus-status]');
+  const button = panel.querySelector('[data-plus-button]');
+  const code = (codeInput?.value || '').trim().toUpperCase().replace(/\s+/g, '');
+  const referencia = (refInput?.value || '').trim();
+
+  if (!code || !code.includes('+')) {
+    status.textContent = 'Ingrese un Plus Code válido, por ejemplo: 86Q8+PF.';
+    return;
+  }
+
+  button.disabled = true;
+  status.textContent = 'Validando Plus Code...';
+  try {
+    let fullCode = code;
+    if (isShort(code)) {
+      if (!referencia) throw new Error('El código es corto. Ingrese también la referencia de localidad, por ejemplo «3 de Noviembre 2da Línea».');
+      status.textContent = 'Buscando la localidad de referencia...';
+      const searchUrl = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&addressdetails=1&accept-language=es&q=${encodeURIComponent(referencia + ', Paraguay')}`;
+      const searchResponse = await fetch(searchUrl, { headers: { Accept: 'application/json' } });
+      if (!searchResponse.ok) throw new Error(`No se pudo consultar la localidad de referencia (${searchResponse.status}).`);
+      const resultados = await searchResponse.json();
+      const referenciaEncontrada = resultados?.[0];
+      if (!referenciaEncontrada) throw new Error('No se encontró la localidad de referencia. Pruebe escribiendo el distrito y departamento, por ejemplo «3 de Noviembre, Caazapá, Paraguay».');
+      fullCode = recoverNearest(code, Number(referenciaEncontrada.lat), Number(referenciaEncontrada.lon));
+    }
+
+    if (!isValid(fullCode)) throw new Error('El Plus Code no es válido o está incompleto.');
+    const ubicacion = decode(fullCode);
+    const lat = Number(ubicacion.latitudeCenter).toFixed(6);
+    const lon = Number(ubicacion.longitudeCenter).toFixed(6);
+    const gpsCard = document.querySelectorAll('.card')[1];
+    const gpsInputs = gpsCard ? [...gpsCard.querySelectorAll('input')] : [];
+    ponerValor(gpsInputs[0], lat);
+    ponerValor(gpsInputs[1], lon);
+
+    status.textContent = `Plus Code convertido correctamente: ${lat}, ${lon}. Buscando dirección...`;
+    const buscarBoton = [...document.querySelectorAll('.gps-search-row button')].find(b => b.textContent.includes('Buscar ubicación por coordenadas'));
+    if (buscarBoton) buscarBoton.click();
+    else status.textContent = `Plus Code convertido: ${lat}, ${lon}.`;
+  } catch (error) {
+    status.textContent = error?.message || 'No fue posible interpretar el Plus Code.';
+  } finally {
+    button.disabled = false;
+  }
+}
+
+function crearPanelPlusCode() {
+  const grid = document.querySelector('.gps-grid');
+  if (!grid || grid.querySelector('.pluscode-panel')) return;
+  const panel = document.createElement('div');
+  panel.className = 'pluscode-panel wide no-print';
+  panel.style.cssText = 'margin:0 2px 2px;padding:12px;border:1px solid #b9d3bf;border-radius:6px;background:#f5fbf6;display:grid;grid-template-columns:minmax(160px,1fr) minmax(220px,2fr) auto;gap:8px;align-items:end;';
+  panel.innerHTML = `
+    <label style="font-size:11px;color:#3d4a57;font-weight:700;display:flex;flex-direction:column;gap:5px;">Plus Code compartido<input data-plus-code type="text" placeholder="Ej.: 86Q8+PF" autocomplete="off" style="width:100%;border:1px solid #b8d0bf;border-radius:5px;background:#fff;padding:9px 10px;"></label>
+    <label style="font-size:11px;color:#3d4a57;font-weight:700;display:flex;flex-direction:column;gap:5px;">Referencia de localidad <span style="font-weight:400;color:#667788;">Necesaria para códigos cortos</span><input data-plus-ref type="text" placeholder="Ej.: 3 de Noviembre 2da Línea, Caazapá" autocomplete="off" style="width:100%;border:1px solid #b8d0bf;border-radius:5px;background:#fff;padding:9px 10px;"></label>
+    <button data-plus-button class="btn btn-primary" type="button">Convertir Plus Code</button>
+    <div data-plus-status style="grid-column:1/-1;color:#667788;font-size:10px;padding-top:2px;">Puede pegar aquí la ubicación que el cliente comparte desde Google Maps. Si el código es corto (por ejemplo 86Q8+PF), informe también la localidad.</div>
+  `;
+  grid.insertBefore(panel, grid.firstChild);
+  panel.querySelector('[data-plus-button]').addEventListener('click', buscarPorPlusCode);
+  panel.querySelector('[data-plus-code]').addEventListener('keydown', e => { if (e.key === 'Enter') buscarPorPlusCode(); });
+}
+
 function instalarMapaGPS() {
   const grid = document.querySelector('.gps-grid');
   if (!grid || grid.querySelector('.gps-map-wrapper')) return;
@@ -288,9 +359,11 @@ function instalarMapaGPS() {
 }
 
 function iniciarMapaGPS() {
+  crearPanelPlusCode();
   instalarMapaGPS();
   crearBotonesPersistencia();
   const observer = new MutationObserver(() => {
+    crearPanelPlusCode();
     instalarMapaGPS();
     crearBotonesPersistencia();
   });
